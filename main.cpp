@@ -1,11 +1,22 @@
 #include <iostream>
 
+void Player2();
+void Player1();
+
 int main() 
 {
-    int health = 100;
-    int damage = 15;
-    health -= damage;
-
-    std::cout << "The remaining health is: " << health << std::endl;
+    Player1();
+    Player2();
     return 0;
 }
+
+void Player2()
+{
+    std::cout << "Welcome" << std::endl;;
+}
+
+void Player1()
+{
+    std::cout << "Hello!" << std::endl;
+}
+
