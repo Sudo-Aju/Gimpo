@@ -7,8 +7,21 @@
 
 int main()
 {
-    std::cout << "First Test!" << "\n";
+    sf::RenderWindow window(
+        sf::VideoMode({400, 1200}),
+        "it is wokring"
+    );
 
-    std::cin.get();
+    while (window.isOpen())
+    {
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+            {
+                window.close();
+            }
+        }
+    }
+
     return 0;
-}
+}   
