@@ -10,7 +10,7 @@
                 "-stdlib=libc++",
                 "main.cpp",
                 "-o",
-                "sfml-app",
+                "sfml",
                 "-I/opt/homebrew/include",
                 "-L/opt/homebrew/lib",
                 "-lsfml-graphics",
