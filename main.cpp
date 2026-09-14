@@ -1,28 +1,27 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
-
-
 int main()
 {
     int playerScore = 0;
     int opponentScore = 0;
     float paddleSpeed = 300.0f;
+    float ballSpeedx = 200.0f;
+    float ballSpeedy = 200.0f;
 
     sf::RenderWindow window(
         sf::VideoMode({800,600}),
         "Gimpo"
     );
 
-    float paddlePos1 = 250.0f;
-    float paddlePos2 = 250.0f;
+    float ly = 250.0f;
+    float ry = 250.0f;
+    float bx = 388.0f;
+    float by = 288.0f;
 
     sf::RectangleShape leftPaddle({20.f,100.f});
     sf::RectangleShape rightPaddle({20.f,100.f});
     sf::CircleShape ball(12.f);
-    ball.setPosition({388,288});
-    
-    
 
     sf::Clock clock;
 
@@ -30,54 +29,92 @@ int main()
     {
         float deltaTime = clock.restart().asSeconds();
         while (const std::optional event = window.pollEvent())
-        
         {
         if (event->is<sf::Event::Closed>())
             window.close();
         }
         
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-            paddlePos1 -= deltaTime * paddleSpeed;
+            ly -= deltaTime * paddleSpeed;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
-            paddlePos1 += deltaTime * paddleSpeed;
+            ly += deltaTime * paddleSpeed;
         }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-            paddlePos2 -= deltaTime * paddleSpeed;
+            ry -= deltaTime * paddleSpeed;
         }
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-            paddlePos2 += deltaTime * paddleSpeed;
+            ry += deltaTime * paddleSpeed;
         }
 
-        leftPaddle.setPosition({25,paddlePos1});
-        rightPaddle.setPosition({755,paddlePos2});
-
-        sf::Vector2f pos1 = leftPaddle.getPosition();
-        sf::Vector2f pos2 = rightPaddle.getPosition();
+        bx += deltaTime * ballSpeedx;
+        by += deltaTime * ballSpeedy;
         
-        if (pos1.y < 0) {
-            paddlePos1 = 0;
+        if (ly < 0) 
+        {
+            ly = 0;
         }
-        if (pos1.y > 500) {
-            paddlePos1 = 500;
+        else if (ly > 500) 
+        {
+            ly = 500;
         }
 
-        if (pos2.y < 0) {
-            paddlePos2 = 0;
+        if (ry < 0) 
+        {
+            ry = 0;
         }
-        if (pos2.y > 500) {
-            paddlePos2 = 500;
+        else if (ry > 500) 
+        {
+            ry = 500;
         }
         
+        if (by < 0)
+        {
+            by = 0;
+            ballSpeedy *= -1;
+        }
+        else if (by > 576){
+            by = 576;
+            ballSpeedy *= -1;
+        }
+        
+        ball.setPosition({bx,by});
+
+        if (ball.getGlobalBounds().findIntersection(
+            leftPaddle.getGlobalBounds()) && bx > 44)
+        {
+            bx = 45;
+            ballSpeedx *= -1;
+        }
+
+        if (ball.getGlobalBounds().findIntersection(
+            rightPaddle.getGlobalBounds()) && bx < 755)
+        {
+            bx = 731;
+            ballSpeedx *= -1;
+        }
+
+        if (ball.getGlobalBounds().findIntersection(
+            rightPaddle.getGlobalBounds()) && bx > 755)
+        {
+            ballSpeedy *= -1;
+        }
+
+        if (ball.getGlobalBounds().findIntersection(
+            leftPaddle.getGlobalBounds()) && bx < 44)
+        {
+            ballSpeedy *= -1;
+        }
+
+
+        
+        leftPaddle.setPosition({25,ly});
+        rightPaddle.setPosition({755,ry});
+
     window.clear();
-    
     window.draw(leftPaddle);
     window.draw(rightPaddle);
     window.draw(ball);
-
     window.display();
-    }
-
-    
-}
+}}
