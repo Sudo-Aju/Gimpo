@@ -1,10 +1,18 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include <cmath>
+#include <string>
+
+const float WINDOW_WIDTH = 800.f;
+const float WINDOW_HEIGHT = 600.f;
+const float PADDLE_WIDTH = 20.f;
+const float PADDLE_HEIGHT = 100.f;
 
 int main()
-{
-    int playerScore = 0;
-    int opponentScore = 0;
+{   
+    int scorel = 0;
+    int scorer = 0;
     float paddleSpeed = 300.0f;
     float ballSpeedx = 200.0f;
     float ballSpeedy = 200.0f;
@@ -22,6 +30,15 @@ int main()
     sf::RectangleShape leftPaddle({20.f,100.f});
     sf::RectangleShape rightPaddle({20.f,100.f});
     sf::CircleShape ball(12.f);
+    sf::Font font;
+    if (!font.openFromFile("./Assets/font.otf")) {
+        std::cerr << "font not loaded" << std::endl;
+        return -1;
+    }
+
+    sf::Text text(font);
+    text.setCharacterSize(24);
+    text.setFillColor(sf::Color::White);
 
     sf::Clock clock;
 
@@ -78,43 +95,64 @@ int main()
             by = 576;
             ballSpeedy *= -1;
         }
-        
-        ball.setPosition({bx,by});
+
+        leftPaddle.setPosition({25,ly});
+        rightPaddle.setPosition({755,ry});
+        ball.setPosition({bx, by});
 
         if (ball.getGlobalBounds().findIntersection(
-            leftPaddle.getGlobalBounds()) && bx > 44)
+            leftPaddle.getGlobalBounds()) && bx <= 45 && ballSpeedx < 0)
         {
             bx = 45;
             ballSpeedx *= -1;
         }
 
         if (ball.getGlobalBounds().findIntersection(
-            rightPaddle.getGlobalBounds()) && bx < 755)
+            rightPaddle.getGlobalBounds()) && bx >= 731 && ballSpeedx > 0)
         {
             bx = 731;
             ballSpeedx *= -1;
         }
 
         if (ball.getGlobalBounds().findIntersection(
-            rightPaddle.getGlobalBounds()) && bx > 755)
+            leftPaddle.getGlobalBounds()) && bx < 45)
         {
             ballSpeedy *= -1;
         }
 
         if (ball.getGlobalBounds().findIntersection(
-            leftPaddle.getGlobalBounds()) && bx < 44)
+            rightPaddle.getGlobalBounds()) && bx > 731)
         {
             ballSpeedy *= -1;
         }
-
-
         
-        leftPaddle.setPosition({25,ly});
-        rightPaddle.setPosition({755,ry});
+        if (bx > 800) 
+        {  
+            bx = 388;
+            by = 288;
+            scorer += 1;
+        }
 
-    window.clear();
-    window.draw(leftPaddle);
-    window.draw(rightPaddle);
-    window.draw(ball);
-    window.display();
-}}
+        if (bx < 0) 
+        {
+            bx = 388;
+            by = 288;
+            scorel += 1;
+        }
+       
+        text.setString("SCORE " + std::to_string(scorer) + " - " + std::to_string(scorel));
+        sf::Vector2f textSize = text.getLocalBounds().size;
+        text.setPosition({400.f - (textSize.x/2) ,300.f - (textSize.y/2)});
+        
+        ball.setPosition({bx,by});
+
+        window.clear();
+
+        window.draw(leftPaddle);
+        window.draw(rightPaddle);
+        window.draw(ball);
+        window.draw(text);
+
+        window.display();
+    }
+}
