@@ -8,151 +8,407 @@ const float WINDOW_WIDTH = 800.f;
 const float WINDOW_HEIGHT = 600.f;
 const float PADDLE_WIDTH = 20.f;
 const float PADDLE_HEIGHT = 100.f;
+const float BALL_RADIUS = 12.f;
+const float BALL_SIZE = BALL_RADIUS * 2.f;
+const float START_BALL_SPEED = 300.f;
+const float MAX_BALL_SPEED = 700.f;
+const float PADDLE_SPEED = 400.f;
+const int WIN_SCORE = 10;
 
 int main()
 {   
     int scorel = 0;
     int scorer = 0;
-    float paddleSpeed = 300.0f;
-    float ballSpeedx = 200.0f;
-    float ballSpeedy = 200.0f;
-
-    sf::RenderWindow window(
-        sf::VideoMode({800,600}),
-        "Gimpo"
-    );
-
+    float paddleSpeed = PADDLE_SPEED;
+    float ballSpeedx = START_BALL_SPEED;
+    float ballSpeedy = START_BALL_SPEED;
     float ly = 250.0f;
     float ry = 250.0f;
     float bx = 388.0f;
     float by = 288.0f;
+    bool gameStarted = false;
+    bool gamePaused = false;
+    bool gameOver = false;
 
-    sf::RectangleShape leftPaddle({20.f,100.f});
-    sf::RectangleShape rightPaddle({20.f,100.f});
-    sf::CircleShape ball(12.f);
+    sf::RenderWindow window(
+        sf::VideoMode({800,600}),
+        "Gimpo Pong"
+    );
+
+    sf::RectangleShape leftPaddle({PADDLE_WIDTH, PADDLE_HEIGHT});
+    sf::RectangleShape rightPaddle({PADDLE_WIDTH, PADDLE_HEIGHT});
+    sf::CircleShape ball(BALL_RADIUS);
+    leftPaddle.setPosition({25.f, ly});
+    rightPaddle.setPosition({755.f, ry});
+    ball.setPosition({bx, by});
+    sf::RectangleShape centerLine({4.f, WINDOW_HEIGHT});
+    centerLine.setPosition({398.f, 0.f});
     sf::Font font;
+
     if (!font.openFromFile("./Assets/font.otf")) {
         std::cerr << "font not loaded" << std::endl;
         return -1;
     }
 
-    sf::Text text(font);
-    text.setCharacterSize(24);
-    text.setFillColor(sf::Color::White);
+    sf::Text scoreText(font);
+    scoreText.setCharacterSize(32);
+    scoreText.setFillColor(sf::Color::White);
+
+    sf::Text titleText(font);
+    titleText.setCharacterSize(50);
+    titleText.setFillColor(sf::Color::White);
+    titleText.setString("GIMPO PONG");
+    sf::Vector2f titleSize = titleText.getLocalBounds().size;
+    titleText.setPosition({
+        400.f - titleSize.x / 2.f, 200.f
+    });
+
+    sf::Text startText(font);
+    startText.setCharacterSize(24);
+    startText.setFillColor(sf::Color::White);
+
+    sf::Text pauseText(font);
+    pauseText.setCharacterSize(40);
+    pauseText.setFillColor(sf::Color::White);
+    pauseText.setString("PAUSED");
+
+    sf::Text winText(font);
+    winText.setCharacterSize(40);
+    winText.setFillColor(sf::Color::White);
+
+    sf::Text countdownText(font);
+    countdownText.setCharacterSize(60);
+    countdownText.setFillColor(sf::Color::White);
+
+    sf::SoundBuffer hitBuffer;
+    sf::SoundBuffer scoreBuffer;
+
+    bool soundsLoaded = false;
+
+    if (hitBuffer.loadFromFile("./Assets/hit.WAV") && 
+        scoreBuffer.loadFromFile("./Assets/ding.WAV"))
+    {
+        soundsLoaded = true;
+    }
+
+    sf::Sound hitSound(hitBuffer);
+    sf::Sound scoreSound(scoreBuffer);
 
     sf::Clock clock;
 
+    float countdown = 0.f;
+    int countdownNumber = 3;
+
     while (window.isOpen())
     {
-        float deltaTime = clock.restart().asSeconds();
-        while (const std::optional event = window.pollEvent())
+            float deltaTime = clock.restart().asSeconds();
+
+        
+
+        if (deltaTime > 0.05f)
         {
-        if (event->is<sf::Event::Closed>())
-            window.close();
+            deltaTime = 0.05f;
         }
         
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W)) {
-            ly -= deltaTime * paddleSpeed;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S)) {
-            ly += deltaTime * paddleSpeed;
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>()) 
+            {
+                window.close();
+            }
+
+        if (event->is<sf::Event::KeyPressed>())
+        {
+            auto key = event->getIf<sf::Event::KeyPressed>()->code;
+
+            if (key == sf::Keyboard::Key::Space)
+            {
+                if (!gameStarted && !gameOver)
+                {
+                    gameStarted = true;
+                    countdown = 3.f;
+                    countdownNumber = 3;
+                }
+            }
+        
+        if (key == sf::Keyboard::Key::P)
+        {
+            if (gameStarted && !gameOver)
+            {
+                gamePaused = !gamePaused;
+            }
         }
 
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
-            ry -= deltaTime * paddleSpeed;
-        }
-        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down)) {
-            ry += deltaTime * paddleSpeed;
+        if (key == sf::Keyboard::Key::R)
+        {
+            scorel = 0;
+            scorer = 0;
+            bx = 388.f;
+            by = 288.f;
+            ballSpeedx = START_BALL_SPEED;
+            ballSpeedy = START_BALL_SPEED;
+            gameOver = false;
+            gameStarted = true;
+            gamePaused = false;
+            countdown = 3.f;
+            countdownNumber = 3;
         }
 
+        if (key == sf::Keyboard::Key::Escape)
+        {
+            window.close();
+        }
+    }
+}
+
+if (gameStarted && !gamePaused && !gameOver)
+{
+
+    if(countdown > 0.f){
+        countdown -= deltaTime;
+
+        if (countdown > 2.f)
+        {
+            countdownNumber = 3;
+        }
+        else if (countdown > 1.f)
+        {
+            countdownNumber = 2;
+        }
+        else if (countdown > 0.f)
+        {
+            countdownNumber = 1;
+        }
+
+        if (countdown <= 0.f)
+        {
+            countdown = 0.f;
+        }
+    }
+
+
+
+    if (countdown <= 0.f)
+    {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+    {
+        ly -= paddleSpeed * deltaTime;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+    {
+        ly += paddleSpeed * deltaTime;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+    {
+        ry -= paddleSpeed * deltaTime;
+    }
+
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+    {
+        ry += paddleSpeed * deltaTime;
+    }
+
+    if (ly < 0.f) 
+        {
+            ly = 0.f;
+        }
+
+        if (ly > WINDOW_HEIGHT - PADDLE_HEIGHT) 
+        {
+            ly = WINDOW_HEIGHT - PADDLE_HEIGHT;
+        }
+
+        if (ry < 0.f) 
+        {
+            ry = 0.f;
+        }
+
+        if (ry > WINDOW_HEIGHT - PADDLE_HEIGHT) 
+        {
+            ry = WINDOW_HEIGHT - PADDLE_HEIGHT;
+        }
+        
         bx += deltaTime * ballSpeedx;
         by += deltaTime * ballSpeedy;
         
-        if (ly < 0) 
+        if (by <= 0.f)
         {
-            ly = 0;
-        }
-        else if (ly > 500) 
-        {
-            ly = 500;
+            by = 0.f;
+            ballSpeedy = std::abs(ballSpeedy);
+
+            if(soundsLoaded)
+            {
+                hitSound.play();
+            }
         }
 
-        if (ry < 0) 
+        if (by >= WINDOW_HEIGHT - BALL_SIZE)
         {
-            ry = 0;
-        }
-        else if (ry > 500) 
-        {
-            ry = 500;
+            by = WINDOW_HEIGHT - BALL_SIZE;
+            ballSpeedy = -std::abs(ballSpeedy);
+
+            if (soundsLoaded)
+            {
+                hitSound.play();
+            }
         }
         
-        if (by < 0)
-        {
-            by = 0;
-            ballSpeedy *= -1;
-        }
-        else if (by > 576){
-            by = 576;
-            ballSpeedy *= -1;
-        }
-
         leftPaddle.setPosition({25,ly});
         rightPaddle.setPosition({755,ry});
         ball.setPosition({bx, by});
 
         if (ball.getGlobalBounds().findIntersection(
-            leftPaddle.getGlobalBounds()) && bx <= 45 && ballSpeedx < 0)
+            leftPaddle.getGlobalBounds()) && ballSpeedx < 0)
         {
-            bx = 45;
-            ballSpeedx *= -1;
-        }
+            bx = 45.f;
+            ballSpeedx = std::abs(ballSpeedx);
+
+            float paddleCenter = ly + PADDLE_HEIGHT / 2.f;
+            float ballCenter = by + BALL_RADIUS;
+            float difference = ballCenter - paddleCenter;
+            float normalized = difference / (PADDLE_HEIGHT / 2.f);
+            ballSpeedy = normalized * std::abs(ballSpeedx);
+            float currentSpeed = std::sqrt(ballSpeedx * ballSpeedx + ballSpeedy * ballSpeedy);
+            currentSpeed += 20.f;
+
+        if (currentSpeed > MAX_BALL_SPEED) currentSpeed = MAX_BALL_SPEED;
+        
+        float angle = std::atan2(ballSpeedy, ballSpeedx);
+        ballSpeedx = std::cos(angle) * currentSpeed;
+        ballSpeedy = std::sin(angle) * currentSpeed;
+        
+        if (soundsLoaded) hitSound.play();
+     }
 
         if (ball.getGlobalBounds().findIntersection(
-            rightPaddle.getGlobalBounds()) && bx >= 731 && ballSpeedx > 0)
+            rightPaddle.getGlobalBounds()) && ballSpeedx > 0)
         {
             bx = 731;
-            ballSpeedx *= -1;
+            ballSpeedx = -std::abs(ballSpeedx);
+
+            float paddleCenter = ry + PADDLE_HEIGHT / 2.f;
+            float ballCenter = by + BALL_RADIUS;
+            float difference = ballCenter - paddleCenter;
+            float normalized = difference / (PADDLE_HEIGHT / 2.f);
+            ballSpeedy = normalized * std::abs(ballSpeedx);
+            float currentSpeed = std::sqrt(ballSpeedx * ballSpeedx + ballSpeedy * ballSpeedy);
+            currentSpeed += 20.f;
+
+            if (currentSpeed > MAX_BALL_SPEED) currentSpeed = MAX_BALL_SPEED;
+
+            float angle = std::atan2(ballSpeedy, ballSpeedx);
+            ballSpeedx = std::cos(angle) * currentSpeed;
+            ballSpeedy = std::sin(angle) * currentSpeed;
+
+            if (soundsLoaded) hitSound.play();
+
         }
 
-        if (ball.getGlobalBounds().findIntersection(
-            leftPaddle.getGlobalBounds()) && bx < 45)
+        if (bx > WINDOW_WIDTH)
         {
-            ballSpeedy *= -1;
+            scorer++;
+            bx = 388.f;
+            by = 288.f;
+            ballSpeedx = -START_BALL_SPEED;
+            ballSpeedy = 0.f;
+            if (soundsLoaded)scoreSound.play();
+            if (scorer >= WIN_SCORE || scorel >= WIN_SCORE) gameOver = true;
         }
 
-        if (ball.getGlobalBounds().findIntersection(
-            rightPaddle.getGlobalBounds()) && bx > 731)
+        if (bx < -BALL_SIZE)
         {
-            ballSpeedy *= -1;
-        }
-        
-        if (bx > 800) 
-        {  
-            bx = 388;
-            by = 288;
-            scorer += 1;
-        }
-
-        if (bx < 0) 
-        {
-            bx = 388;
-            by = 288;
-            scorel += 1;
+            scorel++;
+            bx = 388.f;
+            by = 288.f;
+            ballSpeedx = START_BALL_SPEED;
+            ballSpeedy = 0.f;
+            if (soundsLoaded) scoreSound.play();
+            if (scorer >= WIN_SCORE || scorel >= WIN_SCORE) gameOver = true;
         }
        
-        text.setString("SCORE " + std::to_string(scorer) + " - " + std::to_string(scorel));
-        sf::Vector2f textSize = text.getLocalBounds().size;
-        text.setPosition({400.f - (textSize.x/2) ,300.f - (textSize.y/2)});
+        scoreText.setString("SCORE " + std::to_string(scorer) + " - " + std::to_string(scorel));
+        sf::Vector2f textSize = scoreText.getLocalBounds().size;
+        scoreText.setPosition({400.f - (textSize.x/2) ,300.f - (textSize.y/2)});
         
         ball.setPosition({bx,by});
-
+     }
+    }
         window.clear();
 
         window.draw(leftPaddle);
         window.draw(rightPaddle);
         window.draw(ball);
-        window.draw(text);
+        window.draw(scoreText);
 
+
+        if (!gameStarted)
+        {
+            startText.setString("press space to start");
+            sf::Vector2f size = startText.getLocalBounds().size;
+            startText.setPosition({
+                400.f - size.x / 2.f, 350.f
+            });
+            window.draw(titleText);
+            window.draw(startText);
+        }
+
+            if (gameStarted && countdown > 0.f && !gameOver)
+            {
+                if (countdown > 0.f)
+                {
+                    countdownText.setString(
+                        std::to_string(countdownNumber)
+                    );
+
+                    sf::Vector2f size = countdownText.getLocalBounds().size;
+
+                    countdownText.setPosition({
+                        400.f - size.x / 2.f, 250.f
+                    });
+                    window.draw(countdownText);
+                }
+            }
+
+            if (gamePaused)
+            {
+                sf::Vector2f size = pauseText.getLocalBounds().size;
+
+                pauseText.setPosition({
+                    400.f - size.x / 2.f, 270.f
+                });
+            }
+
+            if (gameOver)
+            {
+                if (scorer >= WIN_SCORE)
+                {
+                    winText.setString(
+                        "rigth player won\n\n"
+                        "press R to restart"
+                    );
+                    
+                }
+                else
+                {
+                    winText.setString("left player won\n\n" "press r to restrt");
+                }
+
+                sf::Vector2f size = winText.getLocalBounds().size;
+                winText.setPosition({
+                    400.f - size.x / 2.f, 230.f
+                
+                });
+                window.draw(winText);
+            }
+
+            
+        
         window.display();
-    }
+    
+        }
+    
+        
+    return 0;
 }

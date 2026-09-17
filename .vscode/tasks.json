@@ -15,7 +15,8 @@
                 "-L/opt/homebrew/lib",
                 "-lsfml-graphics",
                 "-lsfml-window",
-                "-lsfml-system"
+                "-lsfml-system",
+                "-lsfml-audio"
             ],
             "group": {
                 "kind": "build",
