@@ -23,7 +23,7 @@ jobs:
           cmake --build sfml/build --config Release --parallel
 
       - name: Configure Gimpo
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ github.workspace }}/sfml/build"
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ github.workspace }}/sfml/build" -DSFML_STATIC_LIBRARIES=ON
 
       - name: Build Gimpo
         run: cmake --build build --config Release --parallel
