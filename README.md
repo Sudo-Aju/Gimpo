@@ -29,11 +29,11 @@ It features a simple two-player mode alongside an AI opponent, with responsive p
 
 ## Features
 
-Player vs Player
-Player vs AI
-Ball and paddle Physics
-Retro inspired
-Built with SFML 3
+- Player vs Player
+- Player vs AI
+- Ball and paddle Physics
+- Retro inspired
+- Built with SFML 3
 
 ---
 
