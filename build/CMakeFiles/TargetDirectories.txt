@@ -1,3 +1,0 @@
-/Users/MyPC/Gimpo/build/CMakeFiles/Gimpo.dir
-/Users/MyPC/Gimpo/build/CMakeFiles/edit_cache.dir
-/Users/MyPC/Gimpo/build/CMakeFiles/rebuild_cache.dir
