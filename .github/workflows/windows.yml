@@ -1,0 +1,41 @@
+name: Build Windows
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install SFML
+        shell: bash
+        run: |
+          git clone --depth 1 --branch 3.0.x https://github.com/SFML/SFML.git sfml
+          cmake -S sfml -B sfml/build -DCMAKE_BUILD_TYPE=Release -DSFML_BUILD_AUDIO=ON -DSFML_BUILD_GRAPHICS=ON -DSFML_BUILD_WINDOW=ON -DSFML_BUILD_NETWORK=OFF -DSFML_BUILD_EXAMPLES=OFF -DSFML_BUILD_TEST_SUITE=OFF
+          cmake --build sfml/build --config Release --parallel
+
+      - name: Configure Gimpo
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ github.workspace }}/sfml/build"
+
+      - name: Build Gimpo
+        run: cmake --build build --config Release --parallel
+
+      - name: Package
+        shell: bash
+        run: |
+          mkdir Gimpo-Windows
+          cp build/Release/Gimpo.exe Gimpo-Windows/
+          cp -r Assets Gimpo-Windows/
+
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gimpo-Windows
+          path: Gimpo-Windows
