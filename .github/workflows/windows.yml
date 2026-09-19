@@ -14,12 +14,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install SFML
+      - name: Build SFML
         shell: bash
         run: |
-            rm -rf sfml
-            git clone --depth 1 --branch 3.0.x https://github.com/SFML/SFML.git sfml
-            cmake -S sfml -B sfml/build \
+          rm -rf sfml
+
+          git clone --depth 1 --branch 3.0.x https://github.com/SFML/SFML.git sfml
+
+          cmake -S sfml -B sfml/build \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_SHARED_LIBS=ON \
             -DSFML_BUILD_AUDIO=ON \
@@ -27,11 +29,19 @@ jobs:
             -DSFML_BUILD_WINDOW=ON \
             -DSFML_BUILD_NETWORK=OFF \
             -DSFML_BUILD_EXAMPLES=OFF \
-            -DSFML_BUILD_TEST_SUITE=OFF
-            cmake --build sfml/build --config Release --parallel
+            -DSFML_BUILD_TEST_SUITE=OFF \
+            -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/sfml/install"
+
+          cmake --build sfml/build --config Release --parallel
+
+          cmake --install sfml/build --config Release
 
       - name: Configure Gimpo
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${{ github.workspace }}/sfml/build" -DSFML_STATIC_LIBRARIES=OFF
+        run: >
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_PREFIX_PATH="${{ github.workspace }}/sfml/install"
+          -DSFML_STATIC_LIBRARIES=OFF
 
       - name: Build Gimpo
         run: cmake --build build --config Release --parallel
@@ -39,9 +49,13 @@ jobs:
       - name: Package
         shell: bash
         run: |
-          mkdir Gimpo-Windows
+          mkdir -p Gimpo-Windows
+
           cp build/Release/Gimpo.exe Gimpo-Windows/
-          cp -r Assets Gimpo-Windows/
+
+          cp -r Assets Gimpo-Windows/Assets
+
+          cp sfml/install/bin/*.dll Gimpo-Windows/
 
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
