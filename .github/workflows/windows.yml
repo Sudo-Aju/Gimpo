@@ -17,6 +17,7 @@ jobs:
       - name: Install SFML
         shell: bash
         run: |
+          rm -rf sfml  
           git clone --depth 1 --branch 3.0.x https://github.com/SFML/SFML.git sfml
           cmake -S sfml -B sfml/build -DCMAKE_BUILD_TYPE=Release -DSFML_BUILD_AUDIO=ON -DSFML_BUILD_GRAPHICS=ON -DSFML_BUILD_WINDOW=ON -DSFML_BUILD_NETWORK=OFF -DSFML_BUILD_EXAMPLES=OFF -DSFML_BUILD_TEST_SUITE=OFF
           cmake --build sfml/build --config Release --parallel
