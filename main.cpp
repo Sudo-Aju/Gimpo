@@ -7,16 +7,17 @@
 const float WINDOW_WIDTH = 800.f;
 const float WINDOW_HEIGHT = 600.f;
 
+const float PADDLE_SPEED = 400.f;
 const float PADDLE_WIDTH = 20.f;
 const float PADDLE_HEIGHT = 100.f;
 
 const float BALL_RADIUS = 12.f;
 const float BALL_SIZE = BALL_RADIUS * 2.f;
-
 const float START_BALL_SPEED = 300.f;
 const float MAX_BALL_SPEED = 700.f;
 
-const float PADDLE_SPEED = 400.f;
+const float AI_SPEED = 280.f;
+const float AI_REACTION = 400.f;
 
 const int WIN_SCORE = 10;
 
@@ -39,6 +40,8 @@ int main()
     bool gameStarted = false;
     bool gamePaused = false;
     bool gameOver = false;
+    bool aiMode = true;
+    bool firstCountdown = false;
 
     sf::RenderWindow window(
         sf::VideoMode({800,600}),
@@ -64,6 +67,7 @@ int main()
     ball.setPosition({bx, by});
 
     centerLine.setPosition({398.f, 0.f});
+    centerLine.setFillColor(sf::Color(255, 255, 255, 50));
 
     sf::Font font;
 
@@ -164,6 +168,7 @@ int main()
 
                         countdown = 3.f;
                         countdownNumber = 3;
+                        firstCountdown = true;
 
                         bx = 388.f;
                         by = 288.f;
@@ -202,6 +207,7 @@ int main()
 
                     countdown = 3.f;
                     countdownNumber = 3;
+                    firstCountdown = true;
                 }
 
                 if (key == sf::Keyboard::Key::Escape)
@@ -238,26 +244,72 @@ int main()
 
             if (countdown <= 0.f)
             {
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+                if (sf::Keyboard::isKeyPressed(
+                    sf::Keyboard::Key::W))
                 {
                     ly -= paddleSpeed * deltaTime;
                 }
 
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+                if (sf::Keyboard::isKeyPressed(
+                    sf::Keyboard::Key::S))
                 {
                     ly += paddleSpeed * deltaTime;
                 }
 
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+                if (aiMode)
                 {
-                    ry -= paddleSpeed * deltaTime;
-                }
+                    float targetY = WINDOW_HEIGHT / 2.f;
 
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+                    if (ballSpeedx > 0.f && bx > WINDOW_WIDTH - AI_REACTION)
+                    {
+                        float distanceToPaddle = 755.f - bx;
+                        float timeToReach = distanceToPaddle / ballSpeedx;
+                        float predictedY = by + ballSpeedy * timeToReach;
+
+                        while (predictedY < 0.f || 
+                            predictedY > WINDOW_HEIGHT - BALL_SIZE)
+                        {
+                            if (predictedY < 0.f)
+                                predictedY = -predictedY;
+
+                            if (predictedY > WINDOW_HEIGHT - BALL_SIZE)
+                                predictedY = 
+                                    2.f * (WINDOW_HEIGHT - BALL_SIZE) - predictedY;
+                        }
+
+                        targetY = 
+                            predictedY + 
+                            BALL_RADIUS - 
+                            PADDLE_HEIGHT / 2.f;
+                    }
+
+                    float difference = targetY - ry;
+
+                    if (std::abs(difference) > 5.f)
+                    {
+                        float movement = AI_SPEED * deltaTime;
+
+                        if (difference > 0.f)
+                            ry += movement;
+                        else
+                            ry -= movement;
+                    }
+                }
+                else
                 {
-                    ry += paddleSpeed * deltaTime;
-                }
+                    if (sf::Keyboard::isKeyPressed(
+                        sf::Keyboard::Key::Up))
+                    {
+                        ry -= paddleSpeed * deltaTime;
+                    }
 
+                    if (sf::Keyboard::isKeyPressed(
+                        sf::Keyboard::Key::Down))
+                    {
+                        ry += paddleSpeed * deltaTime;
+                    }
+                }
+                
                 if (ly < 0.f) 
                 {
                     ly = 0.f;
@@ -463,6 +515,7 @@ int main()
                     {
                         countdown = 2.f;
                         countdownNumber = 2;
+                        firstCountdown = false;
                     }
                 }
 
@@ -494,6 +547,7 @@ int main()
                     {
                         countdown = 2.f;
                         countdownNumber = 2;
+                        firstCountdown = false;
                     }
                 }
        
@@ -509,7 +563,7 @@ int main()
         
                 scoreText.setPosition({
                     400.f - (textSize.x/2.f), 
-                    300.f - (textSize.y/2.f)
+                    20.f
                 });
         
                 ball.setPosition({bx,
@@ -524,8 +578,11 @@ int main()
         window.draw(leftPaddle);
         window.draw(rightPaddle);
         window.draw(ball);
-        window.draw(scoreText);
 
+        if (gameStarted && (!firstCountdown || countdown <= 0.f) && !gameOver)
+        {
+            window.draw(scoreText);
+        }
 
         if (!gameStarted)
         {
@@ -538,7 +595,7 @@ int main()
 
             startText.setPosition({
                 400.f - size.x / 2.f, 
-                350.f
+                330.f
             });
 
             window.draw(titleText);
@@ -560,7 +617,7 @@ int main()
 
             countdownText.setPosition({
                 400.f - size.x / 2.f,
-                250.f
+                190.f
             });
 
             window.draw(countdownText);
@@ -573,7 +630,7 @@ int main()
 
             pauseText.setPosition({
                 400.f - size.x / 2.f, 
-                270.f
+                190.f
             });
 
             window.draw(pauseText);
@@ -584,14 +641,14 @@ int main()
             if (scorer >= WIN_SCORE)
             {
                 winText.setString(
-                    "RIGHT PLAYER WON\n\n"
+                    "LEFT PLAYER WON\n\n"
                     "PRESS R TO RESTART"
                 );                
             }
             else
             {
                 winText.setString(
-                    "LEFT PLAYER WON\n\n"
+                    "RIGHT PLAYER WON\n\n"
                     "PRESS R TO RESTART"
                 );
             }
@@ -601,7 +658,7 @@ int main()
 
             winText.setPosition({
                 400.f - size.x / 2.f, 
-                230.f
+                180.f
             });
 
             window.draw(winText);
@@ -610,7 +667,7 @@ int main()
 
         window.display();
 
-        }    
+    }    
 
     return 0;
 }
