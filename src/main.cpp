@@ -1,3 +1,4 @@
+#include "paths.hpp"
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -71,7 +72,9 @@ int main()
 
     sf::Font font;
 
-    if (!font.openFromFile("./Assets/font.otf")) 
+    if (!font.openFromFile(
+        (getAssetPath() / "otf/font.otf").string()
+    )) 
     {
         std::cerr << "font not loaded" << std::endl;
         return -1;
@@ -118,8 +121,12 @@ int main()
     bool soundsLoaded = false;
 
     if (
-        hitBuffer.loadFromFile("./Assets/hit.WAV") && 
-        scoreBuffer.loadFromFile("./Assets/ding.WAV")
+        hitBuffer.loadFromFile(
+            (getAssetPath() / "wav/hit.WAV").string()
+        ) && 
+        scoreBuffer.loadFromFile(
+            (getAssetPath() / "wav/ding.WAV").string()
+        )
     )
     {
         soundsLoaded = true;

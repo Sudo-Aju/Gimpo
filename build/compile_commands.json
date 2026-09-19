@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/Users/MyPC/Gimpo/build",
+  "command": "/usr/bin/clang++ -isystem /opt/homebrew/include -g -std=gnu++17 -arch arm64 -o CMakeFiles/Gimpo.dir/src/main.cpp.o -c /Users/MyPC/Gimpo/src/main.cpp",
+  "file": "/Users/MyPC/Gimpo/src/main.cpp",
+  "output": "/Users/MyPC/Gimpo/build/CMakeFiles/Gimpo.dir/src/main.cpp.o"
+},
+{
+  "directory": "/Users/MyPC/Gimpo/build",
+  "command": "/usr/bin/clang++ -isystem /opt/homebrew/include -g -std=gnu++17 -arch arm64 -o CMakeFiles/Gimpo.dir/src/paths.cpp.o -c /Users/MyPC/Gimpo/src/paths.cpp",
+  "file": "/Users/MyPC/Gimpo/src/paths.cpp",
+  "output": "/Users/MyPC/Gimpo/build/CMakeFiles/Gimpo.dir/src/paths.cpp.o"
+}
+]
