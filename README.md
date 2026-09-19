@@ -2,7 +2,7 @@
 
 # Gimpo
 
-![logo](./Assets/logo.png)
+![logo](./Assets/png/logo.png)
 
 </div>
 
@@ -20,10 +20,16 @@ It features a simple two-player mode alongside an AI opponent, with responsive p
 
 ## Gallery
 
-![1](./Assets/1.png)
-![2](./Assets/2.png)
-![3](./Assets/3.png)
-![4](./Assets/4.png)
+<div align="center">
+
+https://github.com/user-attachments/assets/cdd7d64d-b3e8-4cc5-98a3-4275dbc67dd9
+
+![1](./Assets/png/1.png)
+![2](./Assets/png/2.png)
+![3](./Assets/png/3.png)
+![4](./Assets/png/4.png)
+
+</div>
 
 ---
 
